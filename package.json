@@ -1,0 +1,23 @@
+{
+  "name": "ideahack.club",
+  "version": "1.0.0",
+  "description": "Main website for Idea Hackers.",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ideahackers/ideahack.club.git"
+  },
+  "author": "Wyatt Phillips",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ideahackers/ideahack.club/issues"
+  },
+  "homepage": "https://github.com/ideahackers/ideahack.club#readme",
+  "dependencies": {
+    "@types/express": "^4.16.1",
+    "express": "^4.17.0"
+  }
+}
