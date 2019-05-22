@@ -1,13 +1,22 @@
 const express = require('express');
+const exphbs = require('express-handlebars');
+
+// Load routes
+const index = require('./routes/index');
+
 const app = express();
-const port = process.env.PORT || 5000;
+
+// Handlebars middleware
+app.engine('handlebars', exphbs());
+app.set('view engine', 'handlebars');
 
 // Host static content for www
 app.use(express.static('www'));
 
-app.get('/', (req,res) => {
-    res.send('<h1>Welcome to this server!</h1>');
-});
+// Use routes
+app.use('/', index);
+
+const port = process.env.PORT || 5000;
 
 app.listen(port, () => {
     console.log(`Server listening @ ${port}`);
