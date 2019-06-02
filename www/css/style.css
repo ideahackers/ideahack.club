@@ -48,6 +48,10 @@ body {
 }
 
 @media (min-width: 576px) {
+    #main-events {
+        min-width: 300px;
+        max-width: 400px;
+    }
 
     .carousel-inner > .carousel-item {
         height: 500px
