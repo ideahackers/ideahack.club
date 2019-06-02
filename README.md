@@ -1,6 +1,7 @@
 # ideahack.club
 The main website for Idea Hackers.
-Link: https://ideahack.com/
+
+Link: https://ideahack.club/
 
 ## Deployment Instructions
 ### Root Directory:
