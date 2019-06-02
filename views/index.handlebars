@@ -1,17 +1,23 @@
-<div class="row">
-    <div class="col-lg-6">
-        {{> _slideshow}}
-    </div>
-    <div class="col">
-        <div class="card border-primary mb-3" style="max-width: 20rem;">
-            <div class="card-header">Events</div>
-            <div class="card-body">
-                <h4 class="card-title">Events Listing</h4>
-                <p class="card-text">Fetch from MongoDB</p>
+<section id="main-headline">
+    <div class="row no-gutters">
+        <div class="col-sm-8">
+            {{> _slideshow}}
+        </div>
+        <div class="col-sm-4">
+            <div class="card border-primary mb-3 h-100">
+                <div class="card-header h5"><i class="fas fa-calendar-alt"></i>&nbsp;&nbsp;Events</div>
+                <div class="card-body">
+                    <h4 class="card-title">Events Listing</h4>
+                    <p class="card-text">Fetch from MongoDB</p>
+                </div>
             </div>
         </div>
     </div>
-</div>
-<div class="row p-4">
-        <h3>^ Current Layout is not accurate and formatted.</h3>
-</div>
+    <div class="row py-3 px-4 bg-secondary border border-success align-items-center ">
+        <h1 class="mr-auto">Start innovating today!</h1>
+        <div class="ml-auto">
+            <button class="btn btn-outline-info">Learn More</button>
+            <button class="btn btn-outline-success ml-3">Join</button>
+        </div>
+    </div>
+</section>
