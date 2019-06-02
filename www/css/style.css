@@ -6,6 +6,19 @@ body {
     overflow:hidden
 }
 
+.scroll {
+    overflow-y: scroll;
+}
+
+#main-events {
+    height: 500px
+}
+
+#main-events img {
+    max-height: 250px;
+    object-fit: fill;
+}
+
 /* Sticky footer styles
 -------------------------------------------------- */
 html {
@@ -17,6 +30,7 @@ body {
     /* Margin bottom by footer height */
     margin-bottom: 60px;
 }
+
 .footer {
     position: absolute;
     bottom: 0;
@@ -34,9 +48,6 @@ body {
 }
 
 @media (min-width: 576px) {
-    #main-headline {
-
-    }
 
     .carousel-inner > .carousel-item {
         height: 500px
