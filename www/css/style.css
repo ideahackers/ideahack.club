@@ -17,6 +17,7 @@ body {
 #main-events img {
     max-height: 250px;
     object-fit: fill;
+    position: center;
 }
 
 /* Sticky footer styles
@@ -39,7 +40,7 @@ body {
     height: 60px;
     background-color: #f5f5f5;
 }
-
+/*-------------------------------------------------- */
 @media (max-width: 576px) {
     .carousel-inner > .carousel-item img {
         max-width: 100%;
