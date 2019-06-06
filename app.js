@@ -18,7 +18,8 @@ mongoose.connect(db.mongoURI, {
         console.log(`MongoDB Connected -> ${db.mongoURI}`)
     })
     .catch(err => {
-        console.error(`\x1b[31mFailed to connect to MongoDB Server -> ${db.mongoURI}`)
+        console.error(`Failed to connect to MongoDB Server -> ${db.mongoURI}`);
+        console.error(`Cause: ${err}`)
     });
 
 // Handlebars middleware
