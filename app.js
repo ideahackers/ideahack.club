@@ -1,12 +1,28 @@
 const express = require('express');
 const exphbs = require('express-handlebars');
+const mongoose = require('mongoose');
 
 
 
 // Load routes
 const index = require('./routes/index');
 
+// Load configs
+const db = require('./config/mongodb');
+
 const app = express();
+
+// Connect to MongoDB Server
+mongoose.connect(db.mongoURI, {
+    useNewUrlParser: true
+})
+    .then(() => {
+        console.log(`MongoDB Connected -> ${db.mongoURI}`)
+    })
+    .catch(err => {
+        console.error(`Failed to connect to MongoDB Server -> ${db.mongoURI}`);
+        console.error(`Cause: ${err}`)
+    });
 
 // Handlebars middleware
 app.engine('handlebars', exphbs());
