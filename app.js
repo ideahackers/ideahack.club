@@ -1,6 +1,8 @@
 const express = require('express');
 const exphbs = require('express-handlebars');
 
+
+
 // Load routes
 const index = require('./routes/index');
 
@@ -28,4 +30,12 @@ const port = process.env.PORT || 5000;
 
 app.listen(port, () => {
     console.log(`Server listening @ ${port}`);
+    console.log(`Exit app with SIGTERM (^C)`)
 });
+
+// Exit nicely
+process.on('SIGTERM', () => {
+    port.close(() => {
+        console.log('Process terminated')
+    })
+})
