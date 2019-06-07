@@ -10,6 +10,10 @@ body {
     overflow-y: scroll;
 }
 
+.mb-6 {
+    margin-bottom: 6rem !important;
+}
+
 #main-events {
     height: 500px
 }

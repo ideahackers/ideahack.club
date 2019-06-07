@@ -3,7 +3,6 @@ const exphbs = require('express-handlebars');
 const mongoose = require('mongoose');
 
 
-
 // Load routes
 const index = require('./routes/index');
 

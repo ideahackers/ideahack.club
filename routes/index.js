@@ -6,13 +6,6 @@ router.get('/', (req, res) => {
     res.render('index');
 });
 
-// Register route
-router.get('/register', (req, res) => {
-    res.sendFile('views/register.html', {
-        root: '.'
-    });
-});
-
 // Learn more route
 router.get('/info', (req, res) => {
     res.render('info');
@@ -28,8 +21,19 @@ router.get('/contact', (req, res) => {
     res.render('contact');
 });
 
+// Events listing route
 router.get('/events', (req, res) => {
     res.render('events');
+});
+
+// Login route
+router.get('/login', (req, res) => {
+    res.render('login')
+});
+
+// Register route
+router.get('/register', (req, res) => {
+    res.render('register')
 });
 
 
