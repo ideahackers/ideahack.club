@@ -33,7 +33,7 @@ router.get('/login', (req, res) => {
 
 // Register route
 router.get('/register', (req, res) => {
-    res.render('register')
+    res.redirect('https://forms.gle/rWykj7BvXvVmVbDn7')
 });
 
 
