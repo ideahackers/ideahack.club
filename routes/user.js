@@ -5,16 +5,24 @@ const passport = require('passport');
 
 const router = express.Router();
 
-// Load User schema
-require('../models/user');
-const User = mongoose.model('user');
+// Load Register schema
+require('../models/register');
+require('../models/User');
+const Register = mongoose.model('register');
+const User = mongoose.model('User');
 
 
 // functions
 nullTest = function(test) {
     return test ? test : "empty";
 };
-
+router.get('/home', (req,res) => {
+    res.render('user/home')
+});
+router.get('links', (req, res) => {
+    res.render('user/links')
+    // TODO: Populate link pages with slack link. That's the only thing I can think of
+});
 
 router.get('/login', (req, res) => {
     res.render('login')
@@ -24,11 +32,14 @@ router.get('/login', (req, res) => {
 
 router.post('/login', (req, res, next) => {
     passport.authenticate('local', {
-        successRedirect: '/ideas',
-        failureRedirect: '/users/login',
+        successRedirect: '/user/home',
+        failureRedirect: '/user/login',
         failureFlash: true
     })(req, res, next);
+    req.flash('success_msg', 'You are logged in :)');
+
 });
+
 // Register route
 router.get('/register', (req, res) => {
     res.render('user/register')
@@ -48,34 +59,31 @@ router.post('/register/submit', (req, res) => {
         errors.push({text: "Passwords must be at least 8 characters"});
     }
     if (emailDomain !== '@wit.edu') {
-        errors.push({text: "Sorry, at this time this is only a Wentworth Club"});
+        errors.push({text: "Sorry, at this time this is only a Wentworth Club. Please email us"});
     }
     if (errors.length > 0) {
-        console.log("here");
+        req.flash('error_msg', errors);
         res.render('user/register', {
             errors: errors,
             nameFirst: req.body.nameFirst,
             nameLast: req.body.nameLast,
             email: req.body.email,
-            password: req.body.password,
             year: req.body.year,
             major: req.body.major,
             reasonForJoining: req.body.reasonForJoining,
-            portfilioURL: req.body.portfilioURL,
             resumeFile: req.body.resumeFile,
         });
     } else {
-        console.log("there");
-        User.findOne({email: req.body.email})
+        Register.findOne({email: req.body.email})
             .then(user => { // Finding duplicate emails in db
                 if (user) {
-                    //req.flash('error_msg', 'Email already registered');
+                    req.flash('error_msg', 'Email already registered');
                     res.redirect('/user/login');
                 } else {
-                    const newUser = new User({
+                    const newRegister = new Register({
                         nameFirst: nullTest(req.body.nameFirst),
                         nameLast: nullTest(req.body.nameLast),
-                        email: nullTest(req.body.email),
+                        email: req.body.email,
                         academicYear: nullTest(req.body.year),
                         major: nullTest(req.body.major),
                         reasonForJoining: nullTest(req.body.reasonForJoining),
@@ -83,13 +91,25 @@ router.post('/register/submit', (req, res) => {
                         resumeFile: nullTest(req.body.resumeFile),
                         password: req.body.password
                     });
+
                     bcrypt.genSalt(10, (err, salt) => {
-                        bcrypt.hash(newUser.password, salt, (err, hash) => {
+                        bcrypt.hash(newRegister.password, salt, (err, hash) => {
                             if (err) throw err;
-                            newUser.password = hash;
-                            newUser.save()
+                            newRegister.password = hash;
+                            newRegister.save()
+
                                 .then(user => {
-                                    //req.flash('success_msg', 'You are now registered and can log in');
+                                    req.flash('success_msg', 'You are now registered and can log in. Congrats! We will email you soon');
+                                    const newUser = new User({
+                                        userName: req.body.email,
+                                        password: newRegister.password,
+                                        role: "member",
+                                        verified: false
+                                    });
+                                    newUser.save()
+                                        .catch(err => {
+                                            // log error
+                                        });
                                     res.redirect('/user/login');
                                 })
                                 .catch(err => {
@@ -102,5 +122,9 @@ router.post('/register/submit', (req, res) => {
             });
     }
 });
-
+router.get('/logout', (req, res) => {
+    req.logout();
+    req.flash('success_msg', 'You are now logged out');
+    res.redirect('/user/login');
+});
 module.exports = router;

@@ -9,7 +9,7 @@ const UserSchema = new Schema({
         type: String,
         required: true
     },
-    nameFirst: {
+    nameLast: {
         type: String,
         required: true
     },
@@ -47,4 +47,4 @@ const UserSchema = new Schema({
     }
 });
 
-mongoose.model('user', UserSchema);
+mongoose.model('register', UserSchema);
