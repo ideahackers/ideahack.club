@@ -5303,7 +5303,7 @@
     for (var i = 0, len = elements.length; i < len; i++) {
       var _ret = _loop(i, len);
 
-      if (_ret === "continue") continue;
+      if (_ret === "continue")
     }
 
     return createdDocument.body.innerHTML;
@@ -5378,6 +5378,10 @@
     FOCUSIN: "focusin" + EVENT_KEY$6,
     FOCUSOUT: "focusout" + EVENT_KEY$6,
     MOUSEENTER: "mouseenter" + EVENT_KEY$6,
+
+
+
+
     MOUSELEAVE: "mouseleave" + EVENT_KEY$6
   };
   var ClassName$6 = {

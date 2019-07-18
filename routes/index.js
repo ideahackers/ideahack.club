@@ -1,40 +1,26 @@
 const express = require('express');
 const router = express.Router();
 
-// Home page route
+// Home Page Route
 router.get('/', (req, res) => {
     res.render('index');
 });
 
-// Learn more route
 router.get('/info', (req, res) => {
     res.render('info');
 });
 
-// Bio's about the team route
-router.get('/meet-us', (req, res) => {
-    res.render('meet-us');
-});
-
-// Contact Form route
+// Contact Form Route
 router.get('/contact', (req, res) => {
     res.render('contact');
+    // TODO: Make contact page nicer looking? Not sure what else could be added, may be nothing
 });
 
-// Events listing route
+// Events route
 router.get('/events', (req, res) => {
     res.render('events');
+     // TODO: use example collection I have on events
 });
 
-// Login route
-router.get('/login', (req, res) => {
-    res.render('login')
-});
-
-// Register route
-router.get('/register', (req, res) => {
-    res.redirect('https://forms.gle/rWykj7BvXvVmVbDn7')
-});
-
-
+// TODO: make admin page for adding events, and seeing users
 module.exports = router;
