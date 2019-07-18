@@ -22,5 +22,4 @@ router.get('/events', (req, res) => {
      // TODO: use example collection I have on events
 });
 
-// TODO: make admin page for adding events, and seeing users
 module.exports = router;
