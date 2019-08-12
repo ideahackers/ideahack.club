@@ -21,7 +21,7 @@ app.use(Sentry.Handlers.requestHandler());
 
 // All controllers should live here
 app.get('/', function rootHandler(req, res) {
-    res.end('Hello world!');
+    throw "test";
 });
 
 // The error handler must be before any other error middleware and after all controllers
