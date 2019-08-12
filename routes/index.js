@@ -3,7 +3,14 @@ const router = express.Router();
 
 // Home Page Route
 router.get('/', (req, res) => {
+    try {
+        aFunctionThatMightFail();
+    } catch (err) {
+        Sentry.captureException(err);
+    }
+
     res.render('index');
+
 });
 
 router.get('/info', (req, res) => {

@@ -20,9 +20,9 @@ Sentry.init({ dsn: process.env.SENTRY_DSN });
 app.use(Sentry.Handlers.requestHandler());
 
 // All controllers should live here
-app.get('/', function rootHandler(req, res) {
-    throw "test";
-});
+// app.get('/', function rootHandler(req, res) {
+//     throw "test";
+// });
 
 // The error handler must be before any other error middleware and after all controllers
 app.use(Sentry.Handlers.errorHandler());
@@ -46,7 +46,10 @@ require('./config/passport')(passport);
 
 // Connect to MongoDB Server
 mongoose.connect(db.mongoURI, {
-    useNewUrlParser: true
+
+
+
+useNewUrlParser: true
 })
     .then(() => {
         console.log(`MongoDB Connected -> ${db.mongoURI}`)
