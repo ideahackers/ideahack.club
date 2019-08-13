@@ -28,7 +28,7 @@ router.get('/events', function rootHandler(req, res) {
 });
 
 router.get('/debug-sentry', function mainHandler(req, res) {
-    throw "My first Sentry error!";
+    Sentry.captureMessage('Something went wrong')
 });
 
 module.exports = router;
