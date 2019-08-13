@@ -1,4 +1,6 @@
 const express = require('express');
+const Sentry = require('@sentry/node');
+
 const exphbs = require('express-handlebars');
 const session = require('express-session');
 const methodOverride = require('method-override');
@@ -10,9 +12,28 @@ const passport = require('passport');
 
 const app = express();
 
-// Connection for connecting to Atlas DB
+// Sentry Error Logging
 
+Sentry.init({ dsn: process.env.SENTRY_DSN });
 
+// The request handler must be the first middleware on the app
+app.use(Sentry.Handlers.requestHandler());
+
+// All controllers should live here
+// app.get('/', function rootHandler(req, res) {
+//     throw "test";
+// });
+
+// The error handler must be before any other error middleware and after all controllers
+app.use(Sentry.Handlers.errorHandler());
+
+// Optional fallthrough error handler
+app.use(function onError(err, req, res, next) {
+    // The error id is attached to `res.sentry` to be returned
+    // and optionally displayed to the user for support.
+    res.statusCode = 500;
+    res.end(res.sentry + "\n");
+});
 // Load routes
 const index = require('./routes/index');
 const user = require('./routes/user');
@@ -25,7 +46,10 @@ require('./config/passport')(passport);
 
 // Connect to MongoDB Server
 mongoose.connect(db.mongoURI, {
-    useNewUrlParser: true
+
+
+
+useNewUrlParser: true
 })
     .then(() => {
         console.log(`MongoDB Connected -> ${db.mongoURI}`)
