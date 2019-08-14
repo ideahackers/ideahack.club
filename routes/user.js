@@ -19,7 +19,7 @@ nullTest = function(test) {
 router.get('/home', (req,res) => {
     res.render('user/home')
 });
-router.get('links', (req, res) => {
+router.get('/links', (req, res) => {
     res.render('user/links')
     // TODO: Populate link pages with slack link. That's the only thing I can think of
 });
