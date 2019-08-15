@@ -9,7 +9,6 @@ const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const passport = require('passport');
 
-
 const app = express();
 
 // Sentry Error Logging
@@ -40,6 +39,9 @@ const user = require('./routes/user');
 
 // Load configs
 const db = require('./config/mongodb');
+
+// Load globals
+const globals = require('./config/globals');
 
 // Passport config
 require('./config/passport')(passport);
@@ -91,6 +93,9 @@ app.use(function(req, res, next) {
     res.locals.user = req.user || null;
     next();
 });
+
+// Set global vars from config js
+app.use(globals);
 
 // Host static content for www
 app.use(express.static('www'));
