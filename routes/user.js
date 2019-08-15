@@ -27,7 +27,10 @@ router.get('/home', (req,res) => {
 
 router.get('links', (req, res) => {
     res.render('user/links')
-    // TODO: Populate link pages with slack link. That's the only thing I can think of
+    /**
+     * @todo Populate link pages with slack link
+     * @body As well as other links
+     */
 });
 
 router.get('/login', (req, res) => {
@@ -66,8 +69,11 @@ router.get('/confirmation/:token', (req, res) => {
             Sentry.captureException(err);
         });
     res.redirect('/user/login');
-    req.flash('success_msg', 'Congrats! You are now Verified'); // TODO: Make a "your verified" message pop up, this line doesn't work
-
+    req.flash('success_msg', 'Congrats! You are now Verified');
+    /**
+     * @todo Make a "your verified" message pop up, this line doesn't work
+     * @body .
+     */
 });
 
 // Login Post Route
@@ -80,7 +86,11 @@ router.post('/login', (req, res, next) => {
         failureRedirect: '/user/login',
         failureFlash: true
     })(req, res, next);
-    //req.flash('success_msg', 'You are logged in :)'); TODO: fix this. Now will flash this message no matter what
+    //req.flash('success_msg', 'You are logged in :)');
+    /**
+     * @todo TODO:Flash message no matter what you submit
+     * @body .
+     */
 });
 
 

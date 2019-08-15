@@ -24,7 +24,10 @@ router.get('/contact', function rootHandler(req, res) {
 // Events route
 router.get('/events', function rootHandler(req, res) {
     res.render('events');
-     // TODO: use example collection I have on events
+    /**
+     * @todo Populate actual entries
+     * @body Take data from database
+     */
 });
 
 router.get('/debug-sentry', function mainHandler(req, res) {
