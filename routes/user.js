@@ -34,7 +34,7 @@ router.get('/links', (req, res) => {
 });
 
 router.get('/login', (req, res) => {
-    res.render('login')
+    res.render('login', {isForm: true})
 });
 
 
@@ -126,7 +126,7 @@ router.post('/login', (req, res, next) => {
 
 // Register route
 router.get('/register', (req, res) => {
-    res.render('user/register')
+    res.render('user/register', {isForm: true})
 });
 
 router.post('/register/submit', (req, res) => {
