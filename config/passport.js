@@ -22,7 +22,7 @@ module.exports = function (passport) {
             // match password
             bcrypt.compare(password, user.password, (err, isMatch) => {
                 if (isMatch) {
-                    return done(null, user)
+                    return done(null, user, {message: "You are now logged in! :)"})
                 } else {
                     return done(null, false, {message: "Password Incorrect"})
                 }
