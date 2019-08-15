@@ -132,37 +132,71 @@ router.get('/register', (req, res) => {
 router.post('/register/submit', (req, res) => {
 
     let errors = [];
+
+    let reform = {
+        nameFirst: req.body.nameFirst,
+        nameLast: req.body.nameLast,
+        email: req.body.email,
+        year: req.body.year,
+        major: req.body.major,
+        reasonForJoining: req.body.reasonForJoining,
+        portfilioURL: req.body.portfilioURL,
+        resumeFile: req.body.resumeFile,
+        password: req.body.password,
+        passwordConfirm: req.body.passwordConfirm
+    };
+
+    if (req.body.nameFirst.length <= 0) {
+        errors.push({text: "Please provide your First Name"});
+    }
+    if (req.body.nameLast.length <= 0) {
+        errors.push({text: "Please provide your Last Name"});
+    }
+
     let emailDomain = req.body.email, i = emailDomain.indexOf("@");
     if (i !== -1) {
         emailDomain = emailDomain.substring(i);
     }
-    if (req.body.password !== req.body.passwordConfirm) {
-        errors.push({text: "Passwords do not match"});
+    if (req.body.email.match(/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/)){
+        if (emailDomain !== '@wit.edu') {
+            errors.push({text: "Sorry, this club is only available to Wentworth students at this time. Please email us at contact@ideahack.club for outside membership."});
+        }
+    } else {
+        errors.push({text: "An invalid email address was provided"});
     }
+
     if (req.body.password.length < 8) {
         errors.push({text: "Passwords must be at least 8 characters"});
     }
-    if (emailDomain !== '@wit.edu') {
-        errors.push({text: "Sorry, at this time this is only a Wentworth Club. Please email us"});
+    if (req.body.password !== req.body.passwordConfirm) {
+        errors.push({text: "Passwords do not match"});
     }
+
+    if(req.body.year.length <= 0) {
+        errors.push({text: "Please select an Academic Year"});
+    }
+
+    if(req.body.major.length <= 0) {
+        errors.push({text: "Please provide a Decided Major"});
+    }
+
+    if(req.body.reasonForJoining.length < 100) {
+        errors.push({text: "You did not provided more that 100 character for 'Why do you want to join Idea Hackers?'"});
+    }
+
     if (errors.length > 0) {
         req.flash('error_msg', errors);
-        res.render('user/register', {
-            errors: errors,
-            nameFirst: req.body.nameFirst,
-            nameLast: req.body.nameLast,
-            email: req.body.email,
-            year: req.body.year,
-            major: req.body.major,
-            reasonForJoining: req.body.reasonForJoining,
-            resumeFile: req.body.resumeFile,
-        });
+        reform.errors = errors;
+        res.render('user/register', reform);
     } else {
         Register.findOne({email: req.body.email})
             .then(user => { // Finding duplicate emails in db
                 if (user) {
-                    req.flash('error_msg', 'Email already registered');
-                    res.redirect('/user/login');
+                    let error = 'Email already registered';
+                    req.flash('error_msg', error);
+                    errors.push({text: error});
+                    reform.errors = errors;
+                    res.render('user/register', reform);
                 } else {
                     const newRegister = new Register({
                         nameFirst: nullTest(req.body.nameFirst),
@@ -173,8 +207,8 @@ router.post('/register/submit', (req, res) => {
                         reasonForJoining: nullTest(req.body.reasonForJoining),
                         portfilioURL: nullTest(req.body.portfilioURL),
                         resumeFile: nullTest(req.body.resumeFile),
-                        password: req.body.password,
-
+                        notMinor: nullTest(req.body.notMinor),
+                        password: nullTest(req.body.password)
                     });
 
                     bcrypt.genSalt(10, (err, salt) => {
