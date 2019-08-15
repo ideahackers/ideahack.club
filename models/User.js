@@ -17,9 +17,15 @@ const UserSchema = new Schema({
         type: String,
         required: true
     },
-    verified: {
+    isVerified: {
         type: Boolean,
         required: true
+    },
+    passwordResetToken: {
+        type: String
+    },
+    passwordResetExpires: {
+        type: Date
     }
 });
-mongoose.model('User', UserSchema);``;
+mongoose.model('User', UserSchema);
