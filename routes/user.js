@@ -68,15 +68,9 @@ router.get('/confirmation/:token', (req, res) => {
         .catch(err => {
             Sentry.captureException(err);
         });
-    res.redirect('/user/login');
     req.flash('success_msg', 'Congrats! You are now Verified');
-    /**
-     * @todo Make a "your verified" message pop up, this line doesn't work
-     * @body .
-     */
+    res.redirect('/user/login');
 });
-
-// Login Post Route
 
 // Login Post route
 
