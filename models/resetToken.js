@@ -1,12 +1,8 @@
-// User Login Schema
+// Password reset Schema
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
-// @todo Refactor to combine both types to together
-// @body These two schemas are identical
-// Create Schema
-
-const tokenSchema = new Schema({
+const resetToken = new Schema({
     _userId: {
         type: mongoose.Schema.Types.ObjectId,
         required: true,
@@ -23,5 +19,4 @@ const tokenSchema = new Schema({
         expires: 43200
     }
 });
-
-mongoose.model('tokenSchema', tokenSchema);
+mongoose.model('resetToken', resetToken);
