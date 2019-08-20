@@ -2,10 +2,6 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
-// @todo Refactor to combine both types to together
-// @body These two schemas are identical
-// Create Schema
-
 const tokenSchema = new Schema({
     _userId: {
         type: mongoose.Schema.Types.ObjectId,
@@ -13,6 +9,10 @@ const tokenSchema = new Schema({
         ref: 'User'
     },
     token: {
+        type: String,
+        required: true
+    },
+    typeOf: {
         type: String,
         required: true
     },

@@ -14,9 +14,8 @@ const Register = mongoose.model('register');
 require('../models/User');
 const User = mongoose.model('User');
 require('../models/emailToken');
-const emailToken = mongoose.model('tokenSchema');
-require('../models/resetToken');
-const PasswordToken = mongoose.model('resetToken');
+const Token = mongoose.model('tokenSchema');
+
 
 // functions
 nullTest = function(test) {
@@ -41,11 +40,10 @@ router.get('/login', (req, res) => {
 
 // User Reset GET Route -> verifies token, adds a hidden elm to page, posts data
 router.get('/reset/:token', (req, res) => {
-    PasswordToken.findOne({token: req.params.token})
-        .then(token => {
-            if (!token) {
-                req.body.hiddenToken = token;
-                res.render('resetPassword');
+    Token.findOne({token: req.params.token})
+        .then(tokenReturned => {
+            if (tokenReturned) {
+                res.render('resetPassword', {token: req.params.token});
             }
             else {
                 req.flash('error_msg', 'Token not Found, Try Submitting Again');
@@ -55,7 +53,7 @@ router.get('/reset/:token', (req, res) => {
 });
 
 // Route that updated db after password reset data is checked
-router.post('/reset', (req, res) => {
+router.post('/reset/', (req, res) => {
     let errors = [];
     let token = req.body.hiddenToken;
     if (req.body.password !== req.body.passwordConf) {
@@ -64,27 +62,37 @@ router.post('/reset', (req, res) => {
     if (req.body.password.length < 8) {
         errors.push({text: "Password length must be over 8"})
     }
-    if (errors > 0) {
-        req.flash('error_msg', errors);
+    if (errors.length > 0) {
+        req.flash('error_msg', "Either your New Password Don't Match, " +
+            "or it's Under 8 characters. Please Try Again");
+        // For some reason, I couldn't just pass errors, so I give this error string instead
         res.redirect('/user/reset/' + token);
     } else {
-        PasswordToken.findOne({token: token})
+        Token.findOne({token: token})
             .then(token => {
-                User.findOne({_id: token._userId})
-                    .then(user => {
-                        bcrypt.genSalt(10, (err, salt) => {
-                            bcrypt.hash(user.password, salt, (err, hash) => {
-                                if (err) Sentry.captureException(err);
-                                user.password = hash;
-                                user.save();
-                                req.flash("success_msg", "Password Changed");
-                                res.redirect('/user/login');
+                if (token.typeOf === "password") {
+                    User.findOne({_id: token._userId})
+                        .then(user => {
+                            bcrypt.genSalt(10, (err, salt) => {
+                                bcrypt.hash(req.body.password, salt, (err, hash) => {
+                                    if (err) Sentry.captureException(err);
+                                    user.password = hash;
+                                    user.save();
+                                    // Token will delete itself after 12 hours...
+                                    req.flash("success_msg", "Password Changed");
+                                    res.redirect('/user/login');
+                                });
                             });
                         });
-                    })
-                    .catch(err => {Sentry.captureException(err)});
+                } else {
+                    req.flash("error_msg", "Something Went Wrong when Submitting the New " +
+                        "Password, Please Try Again");
+                    res.redirect('/user/reset')
+                }
             })
-            .catch(err => {Sentry.captureException(err)});
+            .catch(err => {
+                Sentry.captureException(err)
+            });
     }
 });
 
@@ -97,17 +105,15 @@ router.post('/reset/email', (req, res) => {
     User.findOne({userName: req.body.email})
         .then(user => {
             if (user) {
-                const token = new emailToken({
+                const token = new Token({
                     _userId: user._id,
-                    token: crypto.randomBytes(16).toString('hex')
+                    token: crypto.randomBytes(16).toString('hex'),
+                    typeOf: "password"
                 });
-                // problem with saving the entry...
-                // see https://sentry.io/organizations/nova-nz/issues/1162518224/events/9d91794ba2e04ccaa550dfc0d2194e8d/
                 token.save()
                     .catch(err => {
                         Sentry.captureException(err)
                     });
-                console.log(token);
                 const transporter = nodemailer.createTransport({
                     service: 'Sendgrid',
                     auth: {
@@ -126,10 +132,11 @@ router.post('/reset/email', (req, res) => {
                 };
                 transporter.sendMail(mailOptions)
                     .catch(err => {Sentry.captureException(err)});
+                req.flash('success_msg', "If there is an email registered with that email, we will send a reset link");
                 res.redirect('/user/login');
         }
             else {
-                req.flash('error_msg', "If there is an email registered with that email, we will send a reset link");
+                req.flash('success_msg', "If there is an email registered with that email, we will send a reset link");
                 res.redirect('/user/login');
             }
         });
@@ -137,9 +144,9 @@ router.post('/reset/email', (req, res) => {
 
 // User Conf Route
 router.get('/confirmation/:token', (req, res) => {
-    emailToken.findOne({token: req.params.token})
+    Token.findOne({token: req.params.token})
         .then(token => {
-            if (!token) {
+            if (!token || token.typeOf !== "emailVerification"){
                 req.flash('error_msg', 'Error Verifying, Please try the link again or email us');
                 res.redirect('/user/login')
             }
@@ -166,8 +173,9 @@ router.get('/confirmation/:token', (req, res) => {
         .catch(err => {
             Sentry.captureException(err);
         });
-    res.redirect('/user/login');
     req.flash('success_msg', 'Congrats! You are now Verified');
+    res.redirect('/user/login');
+
     /**
      * @todo Make a "your verified" message pop up, this line doesn't work
      * @body .
@@ -256,7 +264,7 @@ router.post('/register/submit', (req, res) => {
         res.render('user/register', reform);
     } else {
         Register.findOne({email: req.body.email})
-            .then(user => { // Finding duplicate emails in db
+            .then(user => {
                 if (user) {
                     let error = 'Email already registered';
                     req.flash('error_msg', error);
@@ -283,7 +291,7 @@ router.post('/register/submit', (req, res) => {
                             newRegister.password = hash;
                             newRegister.save()
                                 .then(user => {
-                                    req.flash('success_msg', 'You are now registered and can log in. Congrats! We will email you soon');
+                                    req.flash('success_msg', 'Please verify your email. Congrats for joining!');
                                     const newUser = new User({
                                         userName: req.body.email,
                                         password: newRegister.password,
@@ -294,9 +302,10 @@ router.post('/register/submit', (req, res) => {
                                         .catch(err => {
                                             Sentry.captureException(err);
                                         });
-                                    const token = new emailToken({
+                                    const token = new Token({
                                         _userId: newUser._id,
-                                        token: crypto.randomBytes(16).toString('hex')
+                                        token: crypto.randomBytes(16).toString('hex'),
+                                        typeOf: "emailVerification"
                                     });
                                     token.save()
                                         .catch(err => {
