@@ -18,11 +18,11 @@ const Token = mongoose.model('tokenSchema');
 
 
 // functions
-nullTest = function(test) {
+nullTest = function (test) {
     return test ? test : "empty";
 };
 
-router.get('/home', (req,res) => {
+router.get('/home', (req, res) => {
     res.render('user/home')
 });
 
@@ -44,8 +44,7 @@ router.get('/reset/:token', (req, res) => {
         .then(tokenReturned => {
             if (tokenReturned) {
                 res.render('resetPassword', {token: req.params.token});
-            }
-            else {
+            } else {
                 req.flash('error_msg', 'Token not Found, Try Submitting Again');
                 res.redirect('/user/login')
             }
@@ -127,16 +126,19 @@ router.post('/reset/email', (req, res) => {
                     subject: '💡 Reset Password Link ❕',
                     text: 'Hello,\n\n' + 'Use this link to change your password ' +
                         'for your IdeaHackers Account ' + '\nhttp:\/\/' +
-                        req.headers.host  + '\/user\/reset\/'
+                        req.headers.host + '\/user\/reset\/'
                         + token.token + '\n\n\n\nHave a great day!'
                 };
                 transporter.sendMail(mailOptions)
-                    .catch(err => {Sentry.captureException(err)});
-                req.flash('success_msg', "If there is an email registered with that email, we will send a reset link");
+                    .catch(err => {
+                        Sentry.captureException(err)
+                    });
+                req.flash('success_msg', "If there is an email registered with that email, we will send a reset link" +
+                    "Please check your spam as well!");
                 res.redirect('/user/login');
-        }
-            else {
-                req.flash('success_msg', "If there is an email registered with that email, we will send a reset link");
+            } else {
+                req.flash('success_msg', "If there is an email registered with that email, we will send a reset link" +
+                    "Please check your spam as well!");
                 res.redirect('/user/login');
             }
         });
@@ -146,40 +148,35 @@ router.post('/reset/email', (req, res) => {
 router.get('/confirmation/:token', (req, res) => {
     Token.findOne({token: req.params.token})
         .then(token => {
-            if (!token || token.typeOf !== "emailVerification"){
-                req.flash('error_msg', 'Error Verifying, Please try the link again or email us');
-                res.redirect('/user/login')
-            }
-            // If we found a token, find a matching user
-            User.findOne({_id: token._userId}, function (err, user) {
-                if (!user) {
-                    res.redirect('/user/login');
-                    req.flash('error_msg', 'Error: Could not find a user with that token. Try again');
-                    Sentry.captureMessage('Error: _userId: '
-                        + token._userId + " body.email: " + req.body.email);
-                }
-                if (user.isVerified) {
-                    res.redirect('/user/login');
-                    req.flash('error_msg', 'Error: User Already Verified');
-                }
-                // Verify and save the user
-                user.isVerified = true;
-                user.save()
-                    .catch(err => {
-                        if (err) Sentry.captureEvent(err);
-                    })
-            })
-        })
-        .catch(err => {
-            Sentry.captureException(err);
-        });
-    req.flash('success_msg', 'Congrats! You are now Verified');
-    res.redirect('/user/login');
+            if (!token || token.typeOf !== "emailVerification") {
+                req.flash('error_msg', 'Error Verifying, Please try the link again or email us. By signing in,' +
+                    'a new token will be send to your email. Please check your spam!');
+                res.redirect('/user/login');
 
-    /**
-     * @todo Make a "your verified" message pop up, this line doesn't work
-     * @body .
-     */
+            } else {
+                // If we found a token, find a matching user
+                User.findOne({_id: token._userId}, function (err, user) {
+                    if (!user) {
+                        res.redirect('/user/login');
+                        req.flash('error_msg', 'Error: Could not find a user with that token. Try again');
+                        Sentry.captureMessage('Error: _userId: '
+                            + token._userId + " body.email: " + req.body.email);
+                    }
+                    if (user.isVerified) {
+                        req.flash('error_msg', 'Error: User Already Verified');
+                        res.redirect('/user/login');
+                    }
+                    // Verify and save the user
+                    user.isVerified = true;
+                    user.save()
+                        .catch(err => {
+                            if (err) Sentry.captureEvent(err);
+                        })
+                });
+                req.flash('success_msg', 'Congrats! You are now Verified');
+                res.redirect('/user/login');
+            }
+        });
 });
 
 // Login Post route
@@ -190,13 +187,7 @@ router.post('/login', (req, res, next) => {
         failureRedirect: '/user/login',
         failureFlash: true
     })(req, res, next);
-    //req.flash('success_msg', 'You are logged in :)');
-    /**
-     * @todo TODO:Flash message no matter what you submit
-     * @body .
-     */
 });
-
 // Register route
 router.get('/register', (req, res) => {
     res.render('user/register', {isForm: true})
@@ -230,7 +221,7 @@ router.post('/register/submit', (req, res) => {
     if (i !== -1) {
         emailDomain = emailDomain.substring(i);
     }
-    if (req.body.email.match(/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/)){
+    if (req.body.email.match(/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/)) {
         if (emailDomain !== '@wit.edu') {
             errors.push({text: "Sorry, this club is only available to Wentworth students at this time. Please email us at contact@ideahack.club for outside membership."});
         }
@@ -245,18 +236,18 @@ router.post('/register/submit', (req, res) => {
         errors.push({text: "Passwords do not match"});
     }
 
-    if(req.body.year.length <= 0) {
+    if (req.body.year.length <= 0) {
         errors.push({text: "Please select an Academic Year"});
     }
 
-    if(req.body.major.length <= 0) {
+    if (req.body.major.length <= 0) {
         errors.push({text: "Please provide a Decided Major"});
     }
     //@todo Not sure this is required...
     //@body If anything, change this as its pretty harsh sounding
-    if(req.body.reasonForJoining.length < 100) {
-        errors.push({text: "You did not provide more that 100 character for 'Why do you want to join Idea Hackers?'"});
-    }
+    // if(req.body.reasonForJoining.length < 100) {
+    //     errors.push({text: "You did not provide more that 100 character for 'Why do you want to join Idea Hackers?'"});
+    // }
 
     if (errors.length > 0) {
         req.flash('error_msg', errors);
@@ -291,7 +282,8 @@ router.post('/register/submit', (req, res) => {
                             newRegister.password = hash;
                             newRegister.save()
                                 .then(user => {
-                                    req.flash('success_msg', 'Please verify your email. Congrats for joining!');
+                                    req.flash('success_msg', 'Please verify your email. Congrats for joining!' +
+                                        'Please check your spam as well!');
                                     const newUser = new User({
                                         userName: req.body.email,
                                         password: newRegister.password,
@@ -323,10 +315,12 @@ router.post('/register/submit', (req, res) => {
                                         to: newUser.userName,
                                         subject: '💡 Verify IdeaHackers Account ❕',
                                         text: 'Hello,\n\n' + 'Please verify your IdeaHackers Account by clicking the link: ' +
-                                            '\nhttp:\/\/' + req.headers.host  + '\/user\/confirmation\/' + token.token + '\n'
+                                            '\nhttp:\/\/' + req.headers.host + '\/user\/confirmation\/' + token.token + '\n'
                                     };
                                     transporter.sendMail(mailOptions)
-                                        .catch(err => {Sentry.captureException(err)});
+                                        .catch(err => {
+                                            Sentry.captureException(err)
+                                        });
                                     res.redirect('/user/login');
                                 })
                                 .catch(err => {
