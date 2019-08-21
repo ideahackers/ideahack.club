@@ -1,0 +1,40 @@
+{
+  "addons": [
+
+  ],
+  "buildpacks": [
+    {
+      "url": "heroku/nodejs"
+    }
+  ],
+  "description": "Config File for Heroku",
+  "env": {
+    "HOST": {
+      "required": true
+    },
+    "MONGODB_URI": {
+      "required": true
+    },
+    "PASSPORT_SECRET": {
+      "required": true
+    },
+    "SENDGRID_PASSWORD": {
+      "required": true
+    },
+    "SENDGRID_USERNAME": {
+      "required": true
+    },
+    "SENTRY_DSN": {
+      "required": true
+    }
+  },
+  "formation": {
+    "web": {
+      "quantity": 1
+    }
+  },
+  "name": "ideahack.club",
+  "scripts": {
+  },
+  "stack": "heroku-18"
+}
