@@ -133,12 +133,12 @@ router.post('/reset/email', (req, res) => {
                     .catch(err => {
                         Sentry.captureException(err)
                     });
-                req.flash('success_msg', "If there is an email registered with that email, we will send a reset link" +
-                    "Please check your spam as well!");
+                req.flash('success_msg', "If there is an email registered with that email, we will send a reset link. " +
+                    " Please check your spam as well!");
                 res.redirect('/user/login');
             } else {
-                req.flash('success_msg', "If there is an email registered with that email, we will send a reset link" +
-                    "Please check your spam as well!");
+                req.flash('success_msg', "If there is an email registered with that email, we will send a reset link. " +
+                    " Please check your spam as well!");
                 res.redirect('/user/login');
             }
         });
@@ -150,7 +150,7 @@ router.get('/confirmation/:token', (req, res) => {
         .then(token => {
             if (!token || token.typeOf !== "emailVerification") {
                 req.flash('error_msg', 'Error Verifying, Please try the link again or email us. By signing in,' +
-                    'a new token will be send to your email. Please check your spam!');
+                    ' a new token will be sent to your email. Please check your spam as well!');
                 res.redirect('/user/login');
 
             } else {
@@ -167,14 +167,16 @@ router.get('/confirmation/:token', (req, res) => {
                         res.redirect('/user/login');
                     }
                     // Verify and save the user
-                    user.isVerified = true;
-                    user.save()
-                        .catch(err => {
-                            if (err) Sentry.captureEvent(err);
-                        })
+                    else {
+                        user.isVerified = true;
+                        user.save()
+                            .catch(err => {
+                                if (err) Sentry.captureEvent(err);
+                            });
+                        req.flash('success_msg', 'Congrats! You are now Verified');
+                        res.redirect('/user/login');}
+
                 });
-                req.flash('success_msg', 'Congrats! You are now Verified');
-                res.redirect('/user/login');
             }
         });
 });
@@ -283,7 +285,7 @@ router.post('/register/submit', (req, res) => {
                             newRegister.save()
                                 .then(user => {
                                     req.flash('success_msg', 'Please verify your email. Congrats for joining!' +
-                                        'Please check your spam as well!');
+                                        ' Check your spam as well.');
                                     const newUser = new User({
                                         userName: req.body.email,
                                         password: newRegister.password,

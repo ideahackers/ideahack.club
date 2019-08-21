@@ -10,7 +10,7 @@ const User = mongoose.model('User');
 require('../models/emailToken');
 const Token = mongoose.model('tokenSchema');
 
-module.exports = function (passport, host) {
+module.exports = function (passport) {
     passport.use(new LocalStrategy({usernameField: 'email'}, (email, password, done) => {
         User.findOne({
             userName: email
@@ -24,10 +24,9 @@ module.exports = function (passport, host) {
                     Token.findOne({_userId: user._id})
                         .then(token => {
                             if (token) {
-                                console.log("dadasdas");
                                 return done(null, false, {
                                     message: 'Please Check Your Email, ' +
-                                        'This Account is Not Verified.' +
+                                        'This Account is Not Verified. ' +
                                         'Please check your spam as well!'
                                 });
                             } else {
@@ -58,17 +57,13 @@ module.exports = function (passport, host) {
                                     .catch(err => {
                                         Sentry.captureException(err)
                                     });
-
                                 return done(null, false, {
                                     message: 'We send you a new Verification email. ' +
                                         'The email could be in spam?'
                                 });
                             }
                         })
-
-                }
-                // match password
-                else {
+                } else { // match password
                     bcrypt.compare(password, user.password, (err, isMatch) => {
                         if (isMatch) {
                             return done(null, user)
