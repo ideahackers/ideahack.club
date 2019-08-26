@@ -30,6 +30,11 @@ router.get('/events', function rootHandler(req, res) {
      */
 });
 
+// Code of Conduct route
+router.get('/conduct', function rootHandler(req, res) {
+    res.render('conduct', {title: "Code of Conduct"});
+});
+
 router.get('/debug-sentry', function mainHandler(req, res) {
     Sentry.captureMessage('Something went wrong')
 });

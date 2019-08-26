@@ -35,7 +35,7 @@ router.get('/links', (req, res) => {
 });
 
 router.get('/login', (req, res) => {
-    res.render('login', {isForm: true})
+    res.render('user/login', {isForm: true})
 });
 
 // User Reset GET Route -> verifies token, adds a hidden elm to page, posts data
@@ -178,6 +178,31 @@ router.get('/confirmation/:token', (req, res) => {
 
                 });
             }
+            // If we found a token, find a matching user
+            User.findOne({_id: token._userId}, function (err, user) {
+                if (!user) {
+                    req.flash('error_msg', 'Error: Could not find a user with that token. Try again');
+                    Sentry.captureMessage('Error: _userId: '
+                        + token._userId + " body.email: " + req.body.email);
+                    res.redirect('/user/login');
+                } else if (user.isVerified) {
+                    req.flash('error_msg', 'Error: User Already Verified');
+                    res.redirect('/user/login');
+                } else {
+                    // Verify and save the user
+                    user.isVerified = true;
+                    user.save()
+                        .catch(err => {
+                            if (err) Sentry.captureEvent(err);
+                        });
+                    req.flash('success_msg', 'Congrats! You are now Verified');
+                    res.redirect('/user/login');
+                }
+
+            })
+        })
+        .catch(err => {
+            Sentry.captureException(err);
         });
 });
 
@@ -187,6 +212,7 @@ router.post('/login', (req, res, next) => {
     passport.authenticate('local', {
         successRedirect: '/user/home',
         failureRedirect: '/user/login',
+        successFlash: 'true',
         failureFlash: true
     })(req, res, next);
 });
