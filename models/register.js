@@ -37,7 +37,7 @@ const UserSchema = new Schema({
         type: String,
         required: false
     },
-    resume: { // resume will save file path as string to db
+    resumeURL: { // resume will save file path as string to db
         type: String,
         required: false
     },
