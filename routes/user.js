@@ -7,6 +7,7 @@ const passport = require('passport');
 const router = express.Router();
 const crypto = require('crypto');
 const nodemailer = require('nodemailer');
+const isUrl = require('is-url');
 
 // Load Schema's
 require('../models/register');
@@ -20,6 +21,20 @@ const Token = mongoose.model('tokenSchema');
 // functions
 nullTest = function (test) {
     return test ? test : "empty";
+};
+isNotUrl = function (url) {
+    if (url === "") {
+        return false
+    }
+    if (url.search("http") === -1 || url.search("https")  === -1 ) {
+        url = "http://" + url;
+    }
+    if (!isUrl(url)) {
+        return true;
+    }
+    else {
+        return false;
+    }
 };
 
 router.get('/home', (req, res) => {
@@ -35,7 +50,7 @@ router.get('/links', (req, res) => {
 });
 
 router.get('/login', (req, res) => {
-    res.render('login', {isForm: true})
+    res.render('user/login', {isForm: true})
 });
 
 // User Reset GET Route -> verifies token, adds a hidden elm to page, posts data
@@ -178,15 +193,40 @@ router.get('/confirmation/:token', (req, res) => {
 
                 });
             }
+            // If we found a token, find a matching user
+            User.findOne({_id: token._userId}, function (err, user) {
+                if (!user) {
+                    req.flash('error_msg', 'Error: Could not find a user with that token. Try again');
+                    Sentry.captureMessage('Error: _userId: '
+                        + token._userId + " body.email: " + req.body.email);
+                    res.redirect('/user/login');
+                } else if (user.isVerified) {
+                    req.flash('error_msg', 'Error: User Already Verified');
+                    res.redirect('/user/login');
+                } else {
+                    // Verify and save the user
+                    user.isVerified = true;
+                    user.save()
+                        .catch(err => {
+                            if (err) Sentry.captureEvent(err);
+                        });
+                    req.flash('success_msg', 'Congrats! You are now Verified');
+                    res.redirect('/user/login');
+                }
+
+            })
+        })
+        .catch(err => {
+            Sentry.captureException(err);
         });
 });
 
 // Login Post route
-
 router.post('/login', (req, res, next) => {
     passport.authenticate('local', {
         successRedirect: '/user/home',
         failureRedirect: '/user/login',
+        successFlash: 'true',
         failureFlash: true
     })(req, res, next);
 });
@@ -196,22 +236,7 @@ router.get('/register', (req, res) => {
 });
 
 router.post('/register/submit', (req, res) => {
-
     let errors = [];
-
-    let reform = {
-        nameFirst: req.body.nameFirst,
-        nameLast: req.body.nameLast,
-        email: req.body.email,
-        year: req.body.year,
-        major: req.body.major,
-        reasonForJoining: req.body.reasonForJoining,
-        portfilioURL: req.body.portfilioURL,
-        resumeFile: req.body.resumeFile,
-        password: req.body.password,
-        passwordConfirm: req.body.passwordConfirm
-    };
-
     if (req.body.nameFirst.length <= 0) {
         errors.push({text: "Please provide your First Name"});
     }
@@ -230,7 +255,6 @@ router.post('/register/submit', (req, res) => {
     } else {
         errors.push({text: "An invalid email address was provided"});
     }
-
     if (req.body.password.length < 8) {
         errors.push({text: "Passwords must be at least 8 characters"});
     }
@@ -245,16 +269,24 @@ router.post('/register/submit', (req, res) => {
     if (req.body.major.length <= 0) {
         errors.push({text: "Please provide a Decided Major"});
     }
-    //@todo Not sure this is required...
-    //@body If anything, change this as its pretty harsh sounding
-    // if(req.body.reasonForJoining.length < 100) {
-    //     errors.push({text: "You did not provide more that 100 character for 'Why do you want to join Idea Hackers?'"});
-    // }
-
+    if (isNotUrl(req.body.portfilioURL)) {
+        errors.push({text: "Please Provide a Valid Website URL"});
+    }
+    if (isNotUrl(req.body.resumeFile)) {
+        errors.push({text: "Please Provide a Valid Resume URL"});
+    }
     if (errors.length > 0) {
         req.flash('error_msg', errors);
-        reform.errors = errors;
-        res.render('user/register', reform);
+        res.render('user/register', {isForm: true,
+            errors: errors,
+            nameFirst: req.body.nameFirst,
+            nameLast: req.body.nameLast,
+            email: req.body.email,
+            year: req.body.year,
+            major: req.body.major,
+            reasonForJoining: req.body.reasonForJoining,
+            resumeFile: req.body.resumeFile
+        });
     } else {
         Register.findOne({email: req.body.email})
             .then(user => {
@@ -262,20 +294,28 @@ router.post('/register/submit', (req, res) => {
                     let error = 'Email already registered';
                     req.flash('error_msg', error);
                     errors.push({text: error});
-                    reform.errors = errors;
-                    res.render('user/register', reform);
-                } else {
-                    const newRegister = new Register({
-                        nameFirst: nullTest(req.body.nameFirst),
-                        nameLast: nullTest(req.body.nameLast),
+                    res.render('user/register', {isForm: true,
+                        errors: errors,
+                        nameFirst: req.body.nameFirst,
+                        nameLast: req.body.nameLast,
                         email: req.body.email,
-                        academicYear: nullTest(req.body.year),
-                        major: nullTest(req.body.major),
+                        year: req.body.year,
+                        major: req.body.major,
+                        reasonForJoining: req.body.reasonForJoining,
+                        resumeFile: req.body.resumeFile
+                    });
+                } else {
+                    console.log(req.body.resumeFile);
+                    const newRegister = new Register({
+                        nameFirst: req.body.nameFirst,
+                        nameLast: req.body.nameLast,
+                        email: req.body.email,
+                        academicYear: req.body.year,
+                        major: req.body.major,
                         reasonForJoining: nullTest(req.body.reasonForJoining),
                         portfilioURL: nullTest(req.body.portfilioURL),
-                        resumeFile: nullTest(req.body.resumeFile),
-                        notMinor: nullTest(req.body.notMinor),
-                        password: nullTest(req.body.password)
+                        resumeURL: nullTest(req.body.resumeFile),
+                        password: req.body.password
                     });
 
                     bcrypt.genSalt(10, (err, salt) => {

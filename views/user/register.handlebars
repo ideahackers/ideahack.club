@@ -23,6 +23,8 @@
                 <label for="email">WIT Email Address *</label>
                 <input type="email" class="form-control" id="email" name="email" placeholder="name@wit.edu"
                        value="{{email}}" required>
+                <small id="responseMin" class="form-text text-muted">For the time being, we are only excepting WIT students. If you are interested in joining, please <a href="https://www.ideahack.club/contact">send us a message.</a></small>
+
                 <div class="valid-feedback">School: {{school_name}}</div>
             </div>
             <div class="form-group">
@@ -53,21 +55,23 @@
                        value="{{major}}" required>
             </div>
             <div class="form-group">
-                <label for="reasonForJoining">Why do you want to join Idea Hackers? *</label>
+                <label for="reasonForJoining">Tell us about yourself!</label>
                 <textarea class="form-control" id="reasonForJoining" name="reasonForJoining" rows="3" spellcheck="false"
-                          required>{{reasonForJoining}}</textarea>
-                <!--                <small id="responseMin" class="form-text text-muted"><u>100</u> Character Minimum</small>-->
+                          >{{reasonForJoining}}</textarea>
+                                <small id="responseMin" class="form-text text-muted">For example, what your interests are or why you want to join. Go crazy!</small>
             </div>
             <div class="form-group">
                 <label for="portfilioURL">Website URL (Optional)</label>
-                <input type="url" class="form-control" id="portfilioURL" name="portfilioURL" value="{{portfilioURL}}"
-                       placeholder="https://johndoe.me/">
+                <input type="text" class="form-control" id="portfilioURL" name="portfilioURL" value="{{portfilioURL}}"
+                       placeholder="johndoe.me/">
+                <small id="fileHelp" class="form-text text-muted">This could be your Linkedin profile, or Github for example</small>
+
             </div>
             <div class="form-group">
-                <label for="resumeFile">Submit Resume *</label>
-                <input type="file" class="form-control-file" id="resumeFile" name="resumeFile"
-                       aria-describedby="fileHelp" required>
-                <small id="fileHelp" class="form-text text-muted">While not required, PDF format is preferred.</small>
+                <label for="resumeFile">Resume URL (Optional)</label>
+                <input type="text" class="form-control-file" id="resumeFile" name="resumeFile"
+                       aria-describedby="fileHelp" placeholder="johndoe.me/resume.pdf">
+                <small id="fileHelp" class="form-text text-muted">Please submit a link that's direct to the resume file. Thanks!  </small>
             </div>
             <div class="form-check pb-3">
                 <label class="form-check-label">

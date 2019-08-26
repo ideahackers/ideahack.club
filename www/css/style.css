@@ -10,8 +10,20 @@ body {
     overflow-y: scroll;
 }
 
+.conduct-page {
+    background: url("https://images.unsplash.com/photo-1557682224-5b8590cd9ec5?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1915&q=80");
+}
+
 .mb-6 {
     margin-bottom: 6rem !important;
+}
+
+.bg-black {
+    background-color: #222;
+}
+
+.text-small {
+    font-size: 0.8em;
 }
 
 #main-events {
@@ -22,6 +34,14 @@ body {
     max-height: 250px;
     object-fit: fill;
     position: center;
+}
+
+#conduct-title img {
+    max-height: 150px;
+}
+
+#conduct-body{
+    min-height: 100%;
 }
 
 /* Sticky footer styles
@@ -78,7 +98,13 @@ body {
     .carousel-inner > .carousel-item img {
         width: 100%;
         min-height: 100%;
-
         object-fit: cover;
+    }
+}
+
+@media (min-width: 992px) {
+    .conduct-wrapper {
+        margin-right: 12%;
+        margin-left: 12%;
     }
 }
