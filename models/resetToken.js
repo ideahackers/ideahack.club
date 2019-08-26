@@ -1,18 +1,14 @@
-// User Login Schema
+// Password reset Schema
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
-const tokenSchema = new Schema({
+const resetToken = new Schema({
     _userId: {
         type: mongoose.Schema.Types.ObjectId,
         required: true,
         ref: 'User'
     },
     token: {
-        type: String,
-        required: true
-    },
-    typeOf: {
         type: String,
         required: true
     },
@@ -23,5 +19,4 @@ const tokenSchema = new Schema({
         expires: 43200
     }
 });
-
-mongoose.model('tokenSchema', tokenSchema);
+mongoose.model('resetToken', resetToken);

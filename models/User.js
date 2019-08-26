@@ -20,12 +20,8 @@ const UserSchema = new Schema({
     isVerified: {
         type: Boolean,
         required: true
-    },
-    passwordResetToken: {
-        type: String
-    },
-    passwordResetExpires: {
-        type: Date
     }
 });
+// @todo Are we even saving names to User schema???
+// @body @1fabunicorn
 mongoose.model('User', UserSchema);

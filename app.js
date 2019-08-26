@@ -12,8 +12,6 @@ const bodyParser = require('body-parser');
 passport = require('passport');
 
 const app = express();
-console.log(process.env.SENDGRID_USERNAME);
-console.log(process.env.SENDGRID_PASSWORD);
 
 // Sentry Error Logging
 Sentry.init({dsn: process.env.SENTRY_DSN});
@@ -56,7 +54,6 @@ mongoose.connect(db.mongoURI, {
         console.error(`Failed to connect to MongoDB Server -> ${db.mongoURI}`);
         console.error(`Cause: ${err}`)
     });
-
 
 // Handlebars middleware
 app.engine('handlebars', exphbs({defaultLayout: 'main'}));
