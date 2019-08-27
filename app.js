@@ -1,4 +1,4 @@
-// Load in dev process.env vars if in dev
+// Load in development environment vars if in development
 if (process.env.NODE_ENV !== 'production') require('dotenv').config();
 const express = require('express');
 const Sentry = require('@sentry/node');
@@ -13,13 +13,9 @@ passport = require('passport');
 
 const app = express();
 
-// Sentry Error Logging
+// Sentry Error Logging Middleware
 Sentry.init({dsn: process.env.SENTRY_DSN});
-
-// The request handler must be the first middleware on the app
 app.use(Sentry.Handlers.requestHandler());
-
-// The error handler must be before any other error middleware and after all controllers
 app.use(Sentry.Handlers.errorHandler());
 
 // Optional fallthrough error handler
@@ -30,17 +26,22 @@ app.use(function onError(err, req, res, next) {
     res.end(res.sentry + "\n");
 });
 
+
+// *************************** LOADS ***************************************  //
 // Load routes
 const index = require('./routes/index');
 const user = require('./routes/user');
+const resetPassword = require('./routes/resetPassword');
+const emailConf = require('./routes/emailConf');
+const register = require('./routes/register');
 
-// Load configs
+// Load Mongoose Configs
 const db = require('./config/mongodb');
 
-// Load globals
+// Load Global Functions
 const globals = require('./config/globals');
 
-// Passport config
+// Passport Config
 require('./config/passport')(passport);
 
 // Connect to MongoDB Server
@@ -51,11 +52,13 @@ mongoose.connect(db.mongoURI, {
         console.log(`MongoDB Connected -> ${db.mongoURI}`)
     })
     .catch(err => {
-        console.error(`Failed to connect to MongoDB Server -> ${db.mongoURI}`);
-        console.error(`Cause: ${err}`)
+        Sentry.captureMessage(
+            `Failed to connect to MongoDB Server -> ${db.mongoURI}`
+        );
+        Sentry.captureMessage(`Cause: ${err}`)
     });
 
-// Handlebars middleware
+// Handlebars Middleware
 app.engine('handlebars', exphbs({defaultLayout: 'main'}));
 app.set('view engine', 'handlebars');
 
@@ -63,22 +66,20 @@ app.set('view engine', 'handlebars');
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
 
+// Method Override Middleware
 app.use(methodOverride('_method'));
 
+// Local Passport Configs
 app.use(session({
     secret: process.env.PASSPORT_SECRET,
     resave: true,
     saveUninitialized: true,
 }));
-
-// passport middleware, must be after express middleware
 app.use(passport.initialize());
 app.use(passport.session());
 
-// Use Connect-Flash
+// Connect-Flash + Global Vars
 app.use(flash());
-
-// Global Vars for flash
 app.use(function (req, res, next) {
     res.locals.success_msg = req.flash('success_msg');
     res.locals.error_msg = req.flash('error_msg');
@@ -93,9 +94,12 @@ app.use(globals);
 // Host static content for www
 app.use(express.static('www'));
 
-// Use routes
+// Use Controller routes
 app.use('/', index);
 app.use("/user", user);
+app.use("/user/reset", resetPassword);
+app.use("/user/confirmation/", emailConf);
+app.use("/user/register/", register);
 
 // Page not found [404] route
 app.get('*', function (req, res) {

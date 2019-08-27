@@ -6,9 +6,7 @@ router.use(Sentry.Handlers.requestHandler());
 
 // Home Page Route
 router.get('/', function rootHandler(req, res) {
-
     res.render('index');
-
 });
 
 router.get('/info', function rootHandler(req, res) {
@@ -33,10 +31,6 @@ router.get('/events', function rootHandler(req, res) {
 // Code of Conduct route
 router.get('/conduct', function rootHandler(req, res) {
     res.render('conduct', {title: "Code of Conduct"});
-});
-
-router.get('/debug-sentry', function mainHandler(req, res) {
-    Sentry.captureMessage('Something went wrong')
 });
 
 module.exports = router;
