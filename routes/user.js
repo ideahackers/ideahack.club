@@ -111,7 +111,7 @@ router.post('/reset/', (req, res) => {
 });
 
 router.get('/reset', (req, res) => {
-    res.render('resetPasswordForm')
+    res.render('resetPasswordForm', {isForm: true})
 });
 
 // PUT route for submitting email to reset password too
