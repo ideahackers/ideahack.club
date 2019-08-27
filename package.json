@@ -4,6 +4,7 @@
   "description": "Main website for Idea Hackers.",
   "main": "app.js",
   "scripts": {
+    "dev": "nodemon app.js",
     "start": "node app.js"
   },
   "repository": {
