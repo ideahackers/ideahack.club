@@ -37,6 +37,9 @@ isNotUrl = function (url) {
     }
 };
 
+// Helper Files
+const validation = require('../helpers/validation');
+
 router.get('/home', (req, res) => {
     res.render('user/home')
 });
@@ -58,7 +61,18 @@ router.get('/reset/:token', (req, res) => {
     Token.findOne({token: req.params.token})
         .then(tokenReturned => {
             if (tokenReturned) {
-                res.render('resetPassword', {token: req.params.token});
+                User.findOne({_id: tokenReturned._userId})
+                    .then(userReturned => {
+                        res.render('resetPassword', {
+                            token: req.params.token,
+                            name: userReturned.userName,
+                            isForm: true,
+                        });
+                    })
+                    .catch(err => {
+                        Sentry.captureException(err);
+                        return null;
+                    });
             } else {
                 req.flash('error_msg', 'Token not Found, Try Submitting Again');
                 res.redirect('/user/login')
@@ -111,11 +125,15 @@ router.post('/reset/', (req, res) => {
 });
 
 router.get('/reset', (req, res) => {
-    res.render('resetPasswordForm')
+    res.render('resetPasswordForm', {isForm: true})
 });
 
 // PUT route for submitting email to reset password too
 router.post('/reset/email', (req, res) => {
+    if (!validation.isEmail(req.body.email)) {
+        req.flash('error_msg', "The email used is not valid");
+        res.redirect('/user/reset');
+    } else {
     User.findOne({userName: req.body.email})
         .then(user => {
             if (user) {
@@ -157,6 +175,7 @@ router.post('/reset/email', (req, res) => {
                 res.redirect('/user/login');
             }
         });
+    }
 });
 
 // User Conf Route
@@ -248,7 +267,7 @@ router.post('/register/submit', (req, res) => {
     if (i !== -1) {
         emailDomain = emailDomain.substring(i);
     }
-    if (req.body.email.match(/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/)) {
+    if (validation.isEmail(req.body.email)) {
         if (emailDomain !== '@wit.edu') {
             errors.push({text: "Sorry, this club is only available to Wentworth students at this time. Please email us at contact@ideahack.club for outside membership."});
         }
