@@ -6,9 +6,8 @@ const bcrypt = require('bcryptjs');
 const passport = require('passport');
 const router = express.Router();
 const crypto = require('crypto');
-const nodemailer = require('nodemailer');
 const isUrl = require('is-url');
-
+const email = require("../helpers/email");
 // Load Schema's
 require('../models/register');
 const Register = mongoose.model('register');
@@ -146,26 +145,8 @@ router.post('/reset/email', (req, res) => {
                     .catch(err => {
                         Sentry.captureException(err)
                     });
-                const transporter = nodemailer.createTransport({
-                    service: 'Sendgrid',
-                    auth: {
-                        user: process.env.SENDGRID_USERNAME,
-                        pass: process.env.SENDGRID_PASSWORD
-                    }
-                });
-                const mailOptions = {
-                    from: 'no-reply@ideahack.club',
-                    to: user.userName,
-                    subject: '💡 Reset Password Link ❕',
-                    text: 'Hello,\n\n' + 'Use this link to change your password ' +
-                        'for your IdeaHackers Account ' + '\nhttp:\/\/' +
-                        req.headers.host + '\/user\/reset\/'
-                        + token.token + '\n\n\n\nHave a great day!'
-                };
-                transporter.sendMail(mailOptions)
-                    .catch(err => {
-                        Sentry.captureException(err)
-                    });
+                const data = email.sendData(sendTo=user.userName, "reset", "dasdasdasdasdkjhdjasjd");
+                email.sendEmail(data);
                 req.flash('success_msg', "If there is an email registered with that email, we will send a reset link. " +
                     " Please check your spam as well!");
                 res.redirect('/user/login');

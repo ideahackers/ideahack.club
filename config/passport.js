@@ -3,7 +3,7 @@ const Sentry = require('@sentry/node');
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
-const nodemailer = require('nodemailer');
+// const nodemailer = require('nodemailer');
 
 // load user model
 const User = mongoose.model('User');

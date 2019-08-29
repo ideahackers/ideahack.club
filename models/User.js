@@ -22,6 +22,5 @@ const UserSchema = new Schema({
         required: true
     }
 });
-// @todo Are we even saving names to User schema???
-// @body @1fabunicorn
+
 mongoose.model('User', UserSchema);
