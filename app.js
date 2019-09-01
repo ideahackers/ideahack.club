@@ -93,10 +93,6 @@ app.use(globals);
 // Host static content for www
 app.use(express.static('www'));
 
-// Use routes
-app.use('/', index);
-app.use("/user", user);
-
 // Force ssl
 function requireHTTPS(req, res, next) {
     // The 'x-forwarded-proto' check is for Heroku
@@ -105,8 +101,12 @@ function requireHTTPS(req, res, next) {
     }
     next();
 }
-
 app.use(requireHTTPS);
+
+// Use routes
+app.use('/', index);
+app.use("/user", user);
+
 
 // Page not found [404] route
 app.get('*', function (req, res) {
