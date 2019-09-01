@@ -97,6 +97,17 @@ app.use(express.static('www'));
 app.use('/', index);
 app.use("/user", user);
 
+// Force ssl
+function requireHTTPS(req, res, next) {
+    // The 'x-forwarded-proto' check is for Heroku
+    if (!req.secure && req.get('x-forwarded-proto') !== 'https' && process.env.NODE_ENV !== "development") {
+        return res.redirect('https://' + req.get('host') + req.url);
+    }
+    next();
+}
+
+app.use(requireHTTPS);
+
 // Page not found [404] route
 app.get('*', function (req, res) {
     res.status(404);
