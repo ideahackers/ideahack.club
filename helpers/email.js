@@ -1,22 +1,17 @@
 // Load in dev process.env vars if in dev
 if (process.env.NODE_ENV !== 'production') require('dotenv').config();
-console.log(process.env.MAILGUN_API_KEY);
 const fs = require('fs');
 const Mailgun = require('mailgun-js');
 const Sentry = require('@sentry/node');
 
-// Mapper dictionary's to make code prettier
-const templateMapper = {"reset": "../EmailTemplates/ResetPassword.html",
-    "verify": "../EmailTemplates/VerifyUser.html"
+emailTokenReplace = function (token, file) {
+    const actualFilePath = __dirname + file;
+    const template = fs.readFileSync(actualFilePath, 'utf8');
+    const emailToSend = template.replace(/TOKEN/gi, token);
+    return emailToSend;
 };
-const findMapper = {"reset": /TOKEN/gi, "verify": /TOKEN/gi};
 
-let emailTokenReplace = function (token, file) {
-    const template = fs.readFileSync(templateMapper[file], 'utf8');
-    const email = template.replace(findMapper[file], token);
-    return email;
-};
-const mailgun = new Mailgun({apiKey: process.env.MAILGUN_API_KEY,  domain: "mail.ideahack.club"});
+const mailgun = new Mailgun({apiKey: process.env.MAILGUN_API_KEY, domain: "mail.ideahack.club"});
 module.exports = {
     /*
     {optional param} sendFrom String The "Sent From" address The user sees
@@ -32,25 +27,21 @@ module.exports = {
     "noah.trauben@gmail.com", "testing 123 :)", "reset", "test12dasd"); // Create Email
     email.sendEmail(data); // Send Email!
     */
-    sendData: function(sendTo, emailType, token) {
-        let subject = null;
-        console.log(emailType === "reset");
-        if (emailType === "reset") {let subject = "💡 IdeaHackers Reset Password ❕";}
-        else if (emailType === "verify") {let subject = "💡 Verify IdeaHackers Account ❕"}
-        else {console.log("dasd"); return "Error: Invalid template type"}
-        const email = {
+
+    sendData: function (sendTo, file, token, subject) {
+        const fullHost = "http://" + process.env.HOST + "/user/" + token;
+        let email = {
             from: 'IdeaHackers no-reply <no-reply@ideahack.club>',
             to: sendTo,
             subject: subject,
-            html: emailTokenReplace(token, emailType)
+            html: emailTokenReplace(fullHost, file)
         };
         return email;
     },
+
     sendEmail: function (data) {
-        mailgun.messages().send(data, function(err, body) {
-            console.log(err);
-            // Sentry.captureException(err);
-            console.log(body);
-            });
+        mailgun.messages().send(data, function (err, body) {
+            if (err) Sentry.captureMessage(err, body);
+        });
     }
 };
