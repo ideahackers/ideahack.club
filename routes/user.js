@@ -1,13 +1,15 @@
 const express = require('express');
-const Sentry = require('@sentry/node');
 
+const Sentry = require('@sentry/node');
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const passport = require('passport');
 const router = express.Router();
 const crypto = require('crypto');
-const nodemailer = require('nodemailer');
 const isUrl = require('is-url');
+const fs = require('fs');
+const email = require("../helpers/email");
+
 
 // Load Schema's
 require('../models/register');
@@ -37,6 +39,9 @@ isNotUrl = function (url) {
     }
 };
 
+// Helper Files
+const validation = require('../helpers/validation');
+
 router.get('/home', (req, res) => {
     res.render('user/home')
 });
@@ -58,7 +63,18 @@ router.get('/reset/:token', (req, res) => {
     Token.findOne({token: req.params.token})
         .then(tokenReturned => {
             if (tokenReturned) {
-                res.render('resetPassword', {token: req.params.token});
+                User.findOne({_id: tokenReturned._userId})
+                    .then(userReturned => {
+                        res.render('resetPassword', {
+                            token: req.params.token,
+                            name: userReturned.firstName,
+                            isForm: true,
+                        });
+                    })
+                    .catch(err => {
+                        Sentry.captureException(err);
+                        return null;
+                    });
             } else {
                 req.flash('error_msg', 'Token not Found, Try Submitting Again');
                 res.redirect('/user/login')
@@ -111,11 +127,15 @@ router.post('/reset/', (req, res) => {
 });
 
 router.get('/reset', (req, res) => {
-    res.render('resetPasswordForm')
+    res.render('resetPasswordForm', {isForm: true})
 });
 
 // PUT route for submitting email to reset password too
 router.post('/reset/email', (req, res) => {
+    if (!validation.isEmail(req.body.email)) {
+        req.flash('error_msg', "The email used is not valid");
+        res.redirect('/user/reset');
+    } else {
     User.findOne({userName: req.body.email})
         .then(user => {
             if (user) {
@@ -128,26 +148,10 @@ router.post('/reset/email', (req, res) => {
                     .catch(err => {
                         Sentry.captureException(err)
                     });
-                const transporter = nodemailer.createTransport({
-                    service: 'Sendgrid',
-                    auth: {
-                        user: process.env.SENDGRID_USERNAME,
-                        pass: process.env.SENDGRID_PASSWORD
-                    }
-                });
-                const mailOptions = {
-                    from: 'no-reply@ideahack.club',
-                    to: user.userName,
-                    subject: '💡 Reset Password Link ❕',
-                    text: 'Hello,\n\n' + 'Use this link to change your password ' +
-                        'for your IdeaHackers Account ' + '\nhttp:\/\/' +
-                        req.headers.host + '\/user\/reset\/'
-                        + token.token + '\n\n\n\nHave a great day!'
-                };
-                transporter.sendMail(mailOptions)
-                    .catch(err => {
-                        Sentry.captureException(err)
-                    });
+                const data = email.sendData(user.userName, "/EmailTemplates/ResetPassword.html",
+                    "reset/" + token.token, "💡 IdeaHackers Reset Password ❕");
+                //console.log(data);
+                email.sendEmail(data);
                 req.flash('success_msg', "If there is an email registered with that email, we will send a reset link. " +
                     " Please check your spam as well!");
                 res.redirect('/user/login');
@@ -157,6 +161,7 @@ router.post('/reset/email', (req, res) => {
                 res.redirect('/user/login');
             }
         });
+    }
 });
 
 // User Conf Route
@@ -164,8 +169,8 @@ router.get('/confirmation/:token', (req, res) => {
     Token.findOne({token: req.params.token})
         .then(token => {
             if (!token || token.typeOf !== "emailVerification") {
-                req.flash('error_msg', 'Error Verifying, Please try the link again or email us. By signing in,' +
-                    ' a new token will be sent to your email. Please check your spam as well!');
+                req.flash('error_msg', 'Error verifying account: Please try ' +
+                    'signing in to send a new verification token');
                 res.redirect('/user/login');
 
             } else {
@@ -189,35 +194,10 @@ router.get('/confirmation/:token', (req, res) => {
                                 if (err) Sentry.captureEvent(err);
                             });
                         req.flash('success_msg', 'Congrats! You are now Verified');
-                        res.redirect('/user/login');}
-
+                        res.redirect('/user/login');
+                    }
                 });
             }
-            // If we found a token, find a matching user
-            User.findOne({_id: token._userId}, function (err, user) {
-                if (!user) {
-                    req.flash('error_msg', 'Error: Could not find a user with that token. Try again');
-                    Sentry.captureMessage('Error: _userId: '
-                        + token._userId + " body.email: " + req.body.email);
-                    res.redirect('/user/login');
-                } else if (user.isVerified) {
-                    req.flash('error_msg', 'Error: User Already Verified');
-                    res.redirect('/user/login');
-                } else {
-                    // Verify and save the user
-                    user.isVerified = true;
-                    user.save()
-                        .catch(err => {
-                            if (err) Sentry.captureEvent(err);
-                        });
-                    req.flash('success_msg', 'Congrats! You are now Verified');
-                    res.redirect('/user/login');
-                }
-
-            })
-        })
-        .catch(err => {
-            Sentry.captureException(err);
         });
 });
 
@@ -226,10 +206,11 @@ router.post('/login', (req, res, next) => {
     passport.authenticate('local', {
         successRedirect: '/user/home',
         failureRedirect: '/user/login',
-        successFlash: 'true',
+        successFlash: true,
         failureFlash: true
     })(req, res, next);
 });
+
 // Register route
 router.get('/register', (req, res) => {
     res.render('user/register', {isForm: true})
@@ -248,7 +229,7 @@ router.post('/register/submit', (req, res) => {
     if (i !== -1) {
         emailDomain = emailDomain.substring(i);
     }
-    if (req.body.email.match(/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/)) {
+    if (validation.isEmail(req.body.email)) {
         if (emailDomain !== '@wit.edu') {
             errors.push({text: "Sorry, this club is only available to Wentworth students at this time. Please email us at contact@ideahack.club for outside membership."});
         }
@@ -317,7 +298,6 @@ router.post('/register/submit', (req, res) => {
                         resumeURL: nullTest(req.body.resumeFile),
                         password: req.body.password
                     });
-
                     bcrypt.genSalt(10, (err, salt) => {
                         bcrypt.hash(newRegister.password, salt, (err, hash) => {
                             if (err) Sentry.captureException(err);
@@ -328,6 +308,8 @@ router.post('/register/submit', (req, res) => {
                                         ' Check your spam as well.');
                                     const newUser = new User({
                                         userName: req.body.email,
+                                        firstName: req.body.nameFirst,
+                                        lastName: req.body.nameLast,
                                         password: newRegister.password,
                                         role: "member",
                                         isVerified: false
@@ -345,24 +327,10 @@ router.post('/register/submit', (req, res) => {
                                         .catch(err => {
                                             Sentry.captureException(err)
                                         });
-                                    const transporter = nodemailer.createTransport({
-                                        service: 'Sendgrid',
-                                        auth: {
-                                            user: process.env.SENDGRID_USERNAME,
-                                            pass: process.env.SENDGRID_PASSWORD
-                                        }
-                                    });
-                                    const mailOptions = {
-                                        from: 'no-reply@ideahack.club',
-                                        to: newUser.userName,
-                                        subject: '💡 Verify IdeaHackers Account ❕',
-                                        text: 'Hello,\n\n' + 'Please verify your IdeaHackers Account by clicking the link: ' +
-                                            '\nhttp:\/\/' + req.headers.host + '\/user\/confirmation\/' + token.token + '\n'
-                                    };
-                                    transporter.sendMail(mailOptions)
-                                        .catch(err => {
-                                            Sentry.captureException(err)
-                                        });
+                                    console.log(req.body.email);
+                                    const data = email.sendData(req.body.email, "/EmailTemplates/VerifyAccount.html",
+                                        "confirmation/" + token.token, "💡 Verify IdeaHackers Account ❕");
+                                    email.sendEmail(data);
                                     res.redirect('/user/login');
                                 })
                                 .catch(err => {

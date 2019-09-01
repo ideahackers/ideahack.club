@@ -9,6 +9,14 @@ const UserSchema = new Schema({
         type: String,
         required: true
     },
+    firstName: {
+        type: String,
+        required: true
+    },
+    lastName: {
+        type: String,
+        required: true
+    },
     password: {
         type: String,
         required: true
@@ -22,6 +30,5 @@ const UserSchema = new Schema({
         required: true
     }
 });
-// @todo Are we even saving names to User schema???
-// @body @1fabunicorn
+
 mongoose.model('User', UserSchema);
