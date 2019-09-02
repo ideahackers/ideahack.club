@@ -312,7 +312,8 @@ router.post('/register/submit', (req, res) => {
                                         lastName: req.body.nameLast,
                                         password: newRegister.password,
                                         role: "member",
-                                        isVerified: false
+                                        isVerified: false,
+                                        register: newRegister._id
                                     });
                                     newUser.save()
                                         .catch(err => {
