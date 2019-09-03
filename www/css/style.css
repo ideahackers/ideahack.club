@@ -12,6 +12,7 @@ body {
 
 .conduct-page {
     background: url("https://res.cloudinary.com/idea-hackers/image/upload/v1567490029/background/photo-1557682224-5b8590cd9ec5_khow2l.jpg");
+    background-size: cover;
 }
 .ps2p { /*see font @ https://fonts.google.com/specimen/Press+Start+2P*/
     font-size: 150%;

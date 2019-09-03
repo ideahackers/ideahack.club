@@ -1,6 +1,7 @@
 <nav class="navbar navbar-expand-sm navbar-dark bg-primary">
     <a class="navbar-brand" href="/">
-        <img src="https://res.cloudinary.com/idea-hackers/image/upload/v1567453445/logos/logo_wordmark_xdwpwi.png" width="200">
+        <img src="https://res.cloudinary.com/idea-hackers/image/upload/v1567453445/logos/logo_wordmark_xdwpwi.png"
+             width="250">
     </a>
     <button class="navbar-toggler collapsed" type="button"
             data-toggle="collapse" data-target="#navbarColor01"
@@ -9,38 +10,36 @@
         <span class="navbar-toggler-icon"></span>
     </button>
     <div class="navbar-collapse collapse" id="navbarColor01" style="">
-        <ul class="navbar-nav mr-auto">
-
+    <ul class="navbar-nav mr-auto">
         {{#if user}}
-
             <ul class="navbar-nav ml-auto">
                 <li class="nav-item">
-                    <a class="nav-link" href="/user/home">Profile</a>
+                    <a class="nav-link" href="/user/home"><h5>Profile</h5></a>
                 </li>
+                <!--                <li class="nav-item">-->
+                <!--                    <a class="nav-link" href="/user/links">Important Links</a>-->
+                <!--                </li>-->
                 <li class="nav-item">
-                    <a class="nav-link" href="/user/links">Important Links</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/user/logout">Logout</a>
+                    <a class="nav-link" href="/user/logout"><h5>Logout</h5></a>
                 </li>
             </ul>
         {{else}}
+            <!--            <li class="nav-item">-->
+            <!--                <a class="nav-link" href="/events">Events</a>-->
+            <!--            </li>-->
             <li class="nav-item">
-                <a class="nav-link" href="/events">Events</a>
+                <a class="nav-link" href="/info"><h5>Learn About Us</h5></a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="/info">Learn About Us</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="/contact">Contact</a>
+                <a class="nav-link" href="/contact"><h5>Contact</h5></a>
             </li>
         </ul>
             <ul class="navbar-nav ml-auto">
                 <li class="nav-item">
-                    <a class="nav-link" href="/user/login">Sign In</a>
+                    <a class="nav-link" href="/user/login"><h5>Sign In</h5></a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="/user/register">Join</a>
+                    <a class="nav-link" href="/user/register"><h5>Join</h5></a>
                 </li>
             </ul>
         {{/if}}
