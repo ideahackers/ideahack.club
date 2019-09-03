@@ -10,6 +10,8 @@ const isUrl = require('is-url');
 const fs = require('fs');
 const email = require("../helpers/email");
 
+// Load access control
+const auth = require('../helpers/auth');
 
 // Load Schema's
 require('../models/register');
@@ -42,7 +44,7 @@ isNotUrl = function (url) {
 // Helper Files
 const validation = require('../helpers/validation');
 
-router.get('/home', (req, res) => {
+router.get('/home', auth.ensureAdmin ,(req, res) => {
     res.render('user/home')
 });
 

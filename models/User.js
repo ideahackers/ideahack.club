@@ -29,11 +29,14 @@ const UserSchema = new Schema({
         type: Boolean,
         required: true
     },
+    image_url: {
+        type: String,
+        required: false
+    },
     register: {
         type: Schema.Types.ObjectId,
         ref: 'register'
     }
-
 });
 
 mongoose.model('User', UserSchema);
