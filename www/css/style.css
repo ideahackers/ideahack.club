@@ -94,14 +94,11 @@ body {
         max-width: 400px;
     }
 
-    .carousel-inner > .carousel-item {
-        height: 500px
-    }
-
     .carousel-inner > .carousel-item img {
         width: 100%;
         min-height: 100%;
-        object-fit: cover;
+        max-height: 500px;
+        object-fit: contain;
     }
 }
 
