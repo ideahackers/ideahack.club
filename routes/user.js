@@ -111,8 +111,11 @@ router.get('/confirmation/:token', (req, res) => {
                             .catch(err => {
                                 if (err) Sentry.captureEvent(err);
                             });
-                        const data = email.sendData(user.userName, "/EmailTemplates/WelcomeEmail.html",
-                            process.env.SLACK_LINK, "Welcome to the club 😍");
+                        const data = email.sendData(user.userName,
+                            "/EmailTemplates/WelcomeEmail.html",
+                            process.env.SLACK_LINK,
+                            "Welcome to the club 😍",
+                            false);
                         email.sendEmail(data);
                         req.flash('success_msg', 'Congrats! You are now verified. ' +
                             'We also sent you a welcome email containing important details');
@@ -190,8 +193,11 @@ router.post('/reset/email', (req, res) => {
                     .catch(err => {
                         Sentry.captureException(err)
                     });
-                const data = email.sendData(user.userName, "/EmailTemplates/ResetPassword.html",
-                    "reset/" + token.token, "💡 IdeaHackers Reset Password ❕");
+                const data = email.sendData(user.userName,
+                    "/EmailTemplates/ResetPassword.html",
+                    "reset/" + token.token,
+                    "💡 IdeaHackers Reset Password ❕",
+                    true);
                 //console.log(data);
                 email.sendEmail(data);
                 req.flash('success_msg', "If there is an email registered with that email, we will send a reset link. " +
@@ -334,8 +340,11 @@ router.post('/register/submit', (req, res) => {
                                             Sentry.captureException(err)
                                         });
                                     console.log(req.body.email);
-                                    const data = email.sendData(req.body.email, "/EmailTemplates/VerifyAccount.html",
-                                        "confirmation/" + token.token, "💡 Verify IdeaHackers Account ❕");
+                                    const data = email.sendData(req.body.email,
+                                        "/EmailTemplates/VerifyAccount.html",
+                                        "confirmation/" + token.token,
+                                        "💡 Verify IdeaHackers Account ❕",
+                                        true);
                                     email.sendEmail(data);
                                     res.redirect('/user/login');
                                 })

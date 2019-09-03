@@ -46,7 +46,8 @@ module.exports = function (passport) {
                                     const data = emailHelper.sendData(user.userName,
                                         "/EmailTemplates/VerifyAccount.html",
                                         "confirmation/" + token.token,
-                                        "💡 Verify IdeaHackers Account ❕");
+                                        "💡 Verify IdeaHackers Account ❕",
+                                        true);
                                     emailHelper.sendEmail(data);
                                     return done(null, false, {
                                         message: 'We send you a new ' +

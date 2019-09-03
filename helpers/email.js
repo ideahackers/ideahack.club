@@ -28,15 +28,28 @@ module.exports = {
     email.sendEmail(data); // Send Email!
     */
 
-    sendData: function (sendTo, file, token, subject) {
-        const fullHost = "http://" + process.env.HOST + "/user/" + token;
-        let email = {
-            from: 'IdeaHackers no-reply <no-reply@ideahack.club>',
-            to: sendTo,
-            subject: subject,
-            html: emailTokenReplace(fullHost, file)
-        };
-        return email;
+    sendData: function (sendTo, file, token, subject, local) {
+        if (local) {
+            const fullLink = "http://" + process.env.HOST + "/user/" + token;
+            let email = {
+                from: 'IdeaHackers no-reply <no-reply@ideahack.club>',
+                to: sendTo,
+                subject: subject,
+                html: emailTokenReplace(fullLink, file)
+            };
+            return email;
+        }
+        else {
+            let email = {
+                from: 'IdeaHackers no-reply <no-reply@ideahack.club>',
+                to: sendTo,
+                subject: subject,
+                html: emailTokenReplace(token, file)
+            };
+            return email;
+
+        }
+
     },
 
     sendEmail: function (data) {
