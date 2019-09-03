@@ -40,6 +40,9 @@ const db = require('./config/mongodb');
 // Load globals
 const globals = require('./config/globals');
 
+// Cloudinary config
+const cloudinary = require('./config/cloudinary');
+
 // Passport config
 require('./config/passport')(passport);
 
@@ -89,6 +92,9 @@ app.use(function (req, res, next) {
 
 // Set global vars from config js
 app.use(globals);
+
+// Configure and run cloudinary service
+app.use(cloudinary);
 
 // Host static content for www
 app.use(express.static('www'));
