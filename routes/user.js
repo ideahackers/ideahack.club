@@ -46,13 +46,13 @@ router.get('/home', (req, res) => {
     res.render('user/home')
 });
 
-// router.get('/links', (req, res) => {
-//     res.render('user/links');
-//     /**
-//      * @todo Populate link pages with slack link
-//      * @body As well as other links
-//      */
-// });
+router.get('/links', (req, res) => {
+    res.render('user/links');
+    /**
+     * @todo Populate link pages with slack link
+     * @body As well as other links
+     */
+});
 
 router.get('/login', (req, res) => {
     res.render('user/login', {isForm: true})
