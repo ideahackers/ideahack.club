@@ -37,6 +37,7 @@ const UserSchema = new Schema({
         type: Schema.Types.ObjectId,
         ref: 'register'
     }
+
 });
 
 mongoose.model('User', UserSchema);
