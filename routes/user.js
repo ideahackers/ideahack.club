@@ -46,13 +46,13 @@ router.get('/home', (req, res) => {
     res.render('user/home')
 });
 
-router.get('/links', (req, res) => {
-    res.render('user/links');
-    /**
-     * @todo Populate link pages with slack link
-     * @body As well as other links
-     */
-});
+// router.get('/links', (req, res) => {
+//     res.render('user/links');
+//     /**
+//      * @todo Populate link pages with slack link
+//      * @body As well as other links
+//      */
+// });
 
 router.get('/login', (req, res) => {
     res.render('user/login', {isForm: true})
@@ -80,6 +80,48 @@ router.get('/reset/:token', (req, res) => {
                 res.redirect('/user/login')
             }
         })
+});
+
+// User Conf Route
+router.get('/confirmation/:token', (req, res) => {
+    Token.findOne({token: req.params.token})
+        .then(token => {
+            if (!token || token.typeOf !== "emailVerification") {
+                req.flash('error_msg', 'Error verifying account: Please try ' +
+                    'signing in to send a new verification token');
+                res.redirect('/user/login');
+
+            } else {
+                // If we found a token, find a matching user
+                User.findOne({_id: token._userId}, function (err, user) {
+                    if (!user) {
+                        res.redirect('/user/login');
+                        req.flash('error_msg', 'Error: Could not find a user with that token. Try again');
+                        Sentry.captureMessage('Error: _userId: '
+                            + token._userId + " body.email: " + req.body.email);
+                    }
+                    if (user.isVerified) {
+                        req.flash('error_msg', 'Error: User Already Verified');
+                        res.redirect('/user/login');
+                    }
+                    // Verify and save the user
+                    else {
+                        user.isVerified = true;
+                        user.save()
+                            .catch(err => {
+                                if (err) Sentry.captureEvent(err);
+                            });
+                        const data = email.sendData(user.userName, "/EmailTemplates/WelcomeEmail.html",
+                            process.env.SLACK_LINK, "Welcome to the club 😍");
+                        email.sendEmail(data);
+                        req.flash('success_msg', 'Congrats! You are now verified. ' +
+                            'We also sent you a welcome email containing important details');
+                        res.redirect('/user/login');
+
+                    }
+                });
+            }
+        });
 });
 
 // Route that updated db after password reset data is checked
@@ -164,42 +206,6 @@ router.post('/reset/email', (req, res) => {
     }
 });
 
-// User Conf Route
-router.get('/confirmation/:token', (req, res) => {
-    Token.findOne({token: req.params.token})
-        .then(token => {
-            if (!token || token.typeOf !== "emailVerification") {
-                req.flash('error_msg', 'Error verifying account: Please try ' +
-                    'signing in to send a new verification token');
-                res.redirect('/user/login');
-
-            } else {
-                // If we found a token, find a matching user
-                User.findOne({_id: token._userId}, function (err, user) {
-                    if (!user) {
-                        res.redirect('/user/login');
-                        req.flash('error_msg', 'Error: Could not find a user with that token. Try again');
-                        Sentry.captureMessage('Error: _userId: '
-                            + token._userId + " body.email: " + req.body.email);
-                    }
-                    if (user.isVerified) {
-                        req.flash('error_msg', 'Error: User Already Verified');
-                        res.redirect('/user/login');
-                    }
-                    // Verify and save the user
-                    else {
-                        user.isVerified = true;
-                        user.save()
-                            .catch(err => {
-                                if (err) Sentry.captureEvent(err);
-                            });
-                        req.flash('success_msg', 'Congrats! You are now Verified');
-                        res.redirect('/user/login');
-                    }
-                });
-            }
-        });
-});
 
 // Login Post route
 router.post('/login', (req, res, next) => {
