@@ -27,7 +27,7 @@ const UserSchema = new Schema({
     },
     major: {
         type: String,
-        required: true
+        required: false
     },
     reasonForJoining: {
         type: String,

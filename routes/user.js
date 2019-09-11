@@ -255,19 +255,19 @@ router.post('/register/submit', (req, res) => {
         errors.push({text: "Passwords do not match"});
     }
 
-    if (req.body.year.length <= 0) {
-        errors.push({text: "Please select an Academic Year"});
-    }
-
-    if (req.body.major.length <= 0) {
-        errors.push({text: "Please provide a Decided Major"});
-    }
-    if (isNotUrl(req.body.portfilioURL)) {
-        errors.push({text: "Please Provide a Valid Website URL"});
-    }
-    if (isNotUrl(req.body.resumeFile)) {
-        errors.push({text: "Please Provide a Valid Resume URL"});
-    }
+    // if (req.body.year.length <= 0) {
+    //     errors.push({text: "Please select an Academic Year"});
+    // }
+    //
+    // if (req.body.major.length <= 0) {
+    //     errors.push({text: "Please provide a Decided Major"});
+    // }
+    // if (isNotUrl(req.body.portfilioURL)) {
+    //     errors.push({text: "Please Provide a Valid Website URL"});
+    // }
+    // if (isNotUrl(req.body.resumeFile)) {
+    //     errors.push({text: "Please Provide a Valid Resume URL"});
+    // }
     if (errors.length > 0) {
         req.flash('error_msg', errors);
         res.render('user/register', {isForm: true,
@@ -293,9 +293,9 @@ router.post('/register/submit', (req, res) => {
                         nameLast: req.body.nameLast,
                         email: req.body.email,
                         year: req.body.year,
-                        major: req.body.major,
-                        reasonForJoining: req.body.reasonForJoining,
-                        resumeFile: req.body.resumeFile
+                        // major: req.body.major,
+                        // reasonForJoining: req.body.reasonForJoining,
+                        // resumeFile: req.body.resumeFile
                     });
                 } else {
                     console.log(req.body.resumeFile);
@@ -303,7 +303,7 @@ router.post('/register/submit', (req, res) => {
                         nameFirst: req.body.nameFirst,
                         nameLast: req.body.nameLast,
                         email: req.body.email,
-                        academicYear: req.body.year,
+                        academicYear: nullTest(req.body.year),
                         major: req.body.major,
                         reasonForJoining: nullTest(req.body.reasonForJoining),
                         portfilioURL: nullTest(req.body.portfilioURL),
