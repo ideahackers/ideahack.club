@@ -276,9 +276,9 @@ router.post('/register/submit', (req, res) => {
             nameLast: req.body.nameLast,
             email: req.body.email,
             year: req.body.year,
-            major: req.body.major,
-            reasonForJoining: req.body.reasonForJoining,
-            resumeFile: req.body.resumeFile
+            // major: req.body.major,
+            // reasonForJoining: req.body.reasonForJoining,
+            // resumeFile: req.body.resumeFile
         });
     } else {
         Register.findOne({email: req.body.email})
